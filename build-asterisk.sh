@@ -3,7 +3,7 @@ set -ex
 
 mkdir -p /usr/src/asterisk
 cd /usr/src/asterisk
-
+export ASTERISK_VERSION="16.4.0"
 # 1.5 jobs per core works out okay
 : ${JOBS:=$(( $(nproc) + $(nproc) / 2 ))}
 
@@ -53,3 +53,4 @@ mv codec_g729.so /usr/lib/asterisk/modules/
 sed -i -E 's/^;(run)(user|group)/\1\2/' /etc/asterisk/asterisk.conf
 
 rm -rf /usr/src/asterisk
+cp -a /etc/asterisk/conf /etc/asterisk/

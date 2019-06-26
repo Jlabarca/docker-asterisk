@@ -1,7 +1,16 @@
 FROM debian:jessie
-LABEL maintainer="FluxoTI <lucasvs@outlook.com>"
 
-RUN useradd --system asterisk
+RUN apt-get update && \
+    apt-get -y install sudo
+
+ENV user asterisk
+
+RUN useradd -m -d /home/${user} ${user} && \
+    chown -R ${user} /home/${user} && \
+    adduser ${user} sudo && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+#USER ${user}
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -qq -y && \
@@ -56,9 +65,11 @@ RUN echo 'deb http://packages.irontec.com/debian jessie main' >> /etc/apt/source
 
 RUN rm -rf /var/lib/apt/lists/*
 
+ADD conf /etc/asterisk/conf
+ADD keys /etc/asterisk/keys
+COPY build-asterisk.sh /build-asterisk.sh
+RUN sudo chmod +x /build-asterisk.sh
 ENV ASTERISK_VERSION=16.4.0
-
-COPY build-asterisk.sh /build-asterisk
-RUN DEBIAN_FRONTEND=noninteractive /build-asterisk
+RUN sudo DEBIAN_FRONTEND=noninteractive bash /build-asterisk.sh
 
 CMD ["/usr/sbin/asterisk", "-f"]
